@@ -1,0 +1,603 @@
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+    background: linear-gradient(135deg, #6B6B6B 0%, #4A4A4A 100%);
+    min-height: 100vh;
+    padding: 20px;
+}
+
+.container {
+    max-width: 1200px;
+    margin: 0 auto;
+}
+
+header {
+    text-align: center;
+    color: white;
+    margin-bottom: 40px;
+}
+
+.header-logo {
+    width: 120px;
+    height: 120px;
+    margin: 0 auto 20px;
+    display: block;
+    background: white;
+    padding: 10px;
+    border-radius: 50%;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+}
+
+header h1 {
+    font-size: 2.5rem;
+    text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.2);
+    margin-bottom: 5px;
+}
+
+.gym-subtitle {
+    font-size: 1.2rem;
+    color: rgba(255, 255, 255, 0.9);
+    font-weight: 400;
+    margin-top: 5px;
+}
+
+main {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 30px;
+}
+
+section {
+    background: white;
+    border-radius: 15px;
+    padding: 30px;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+}
+
+h2 {
+    color: #3CADD4;
+    margin-bottom: 20px;
+    font-size: 1.8rem;
+}
+
+h3 {
+    color: #555;
+    margin-bottom: 15px;
+    font-size: 1.2rem;
+}
+
+.form-group {
+    margin-bottom: 15px;
+}
+
+.form-group label {
+    display: block;
+    margin-bottom: 5px;
+    color: #555;
+    font-weight: 500;
+}
+
+.form-group input,
+.form-group textarea {
+    width: 100%;
+    padding: 10px;
+    border: 2px solid #e0e0e0;
+    border-radius: 8px;
+    font-size: 1rem;
+    transition: border-color 0.3s;
+}
+
+.form-group input:focus {
+    outline: none;
+    border-color: #3CADD4;
+}
+
+.exercises-container {
+    border: 2px dashed #e0e0e0;
+    border-radius: 10px;
+    padding: 20px;
+    margin: 20px 0;
+    background: #f9f9f9;
+}
+
+.exercise-item {
+    background: white;
+    border: 2px solid #e0e0e0;
+    border-radius: 10px;
+    padding: 15px;
+    margin-bottom: 15px;
+    position: relative;
+}
+
+.form-row {
+    display: grid;
+    grid-template-columns: 2fr 1fr 1fr 1fr auto;
+    gap: 10px;
+    align-items: end;
+}
+
+.btn-primary,
+.btn-secondary,
+.btn-remove,
+.btn-delete,
+.btn-edit {
+    padding: 12px 24px;
+    border: none;
+    border-radius: 8px;
+    font-size: 1rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s;
+}
+
+.btn-primary {
+    background: linear-gradient(135deg, #3CADD4 0%, #2A8FB5 100%);
+    color: white;
+    width: 100%;
+    margin-top: 20px;
+}
+
+.btn-primary:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 5px 15px rgba(60, 173, 212, 0.4);
+}
+
+.btn-secondary {
+    background: #4caf50;
+    color: white;
+    width: 100%;
+}
+
+.btn-secondary:hover {
+    background: #45a049;
+}
+
+.btn-remove {
+    background: #f44336;
+    color: white;
+    padding: 8px 12px;
+    font-size: 1.2rem;
+    line-height: 1;
+}
+
+.btn-remove:hover {
+    background: #da190b;
+}
+
+.btn-delete,
+.btn-edit {
+    padding: 8px 16px;
+    font-size: 0.9rem;
+}
+
+.btn-delete {
+    background: #f44336;
+    color: white;
+}
+
+.btn-delete:hover {
+    background: #da190b;
+}
+
+.btn-edit {
+    background: #2196f3;
+    color: white;
+}
+
+.btn-edit:hover {
+    background: #0b7dda;
+}
+
+.workout-card {
+    border: 2px solid #e0e0e0;
+    border-radius: 10px;
+    padding: 20px;
+    margin-bottom: 20px;
+    background: #f9f9f9;
+    transition: transform 0.2s;
+}
+
+.workout-card:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+}
+
+.workout-card h3 {
+    color: #3CADD4;
+    margin-bottom: 15px;
+}
+
+.exercise-list {
+    margin: 15px 0;
+}
+
+.exercise-entry {
+    background: white;
+    padding: 12px;
+    border-radius: 8px;
+    margin-bottom: 10px;
+    border-left: 4px solid #3CADD4;
+}
+
+.exercise-entry strong {
+    color: #333;
+    display: block;
+    margin-bottom: 5px;
+}
+
+.exercise-details {
+    color: #666;
+    font-size: 0.95rem;
+}
+
+.exercise-notes {
+    color: #888;
+    font-size: 0.9rem;
+    font-style: italic;
+    margin-top: 5px;
+}
+
+.image-upload-group {
+    margin-top: 10px;
+}
+
+.image-upload-container {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.exercise-image {
+    padding: 8px;
+    border: 2px dashed #3CADD4;
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 0.9rem;
+}
+
+.image-preview {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.image-preview img {
+    max-width: 200px;
+    max-height: 200px;
+    border-radius: 8px;
+    object-fit: cover;
+    border: 2px solid #3CADD4;
+}
+
+.btn-remove-image {
+    background: #ff6b6b;
+    color: white;
+    border: none;
+    padding: 8px 16px;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 0.9rem;
+    font-weight: 600;
+    transition: background 0.3s;
+    width: fit-content;
+}
+
+.btn-remove-image:hover {
+    background: #ff5252;
+}
+
+.exercise-image-display {
+    margin-bottom: 10px;
+}
+
+.exercise-image-display img {
+    width: 100%;
+    max-width: 300px;
+    height: auto;
+    border-radius: 8px;
+    object-fit: cover;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.exercise-entry {
+    display: flex;
+    flex-direction: column;
+}
+
+.exercise-info {
+    flex: 1;
+}
+
+.workout-actions {
+    display: flex;
+    gap: 10px;
+    margin-top: 15px;
+}
+
+.empty-state {
+    text-align: center;
+    color: #999;
+    padding: 40px;
+    font-style: italic;
+}
+
+/* Stili Login */
+.login-page {
+    min-height: 100vh;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background: linear-gradient(135deg, #6B6B6B 0%, #4A4A4A 100%);
+}
+
+.login-container {
+    background: white;
+    border-radius: 20px;
+    padding: 40px;
+    box-shadow: 0 10px 50px rgba(0, 0, 0, 0.3);
+    max-width: 450px;
+    width: 100%;
+}
+
+.login-logo {
+    width: 150px;
+    height: 150px;
+    margin: 0 auto 20px;
+    display: block;
+    padding: 15px;
+    background: #f5f5f5;
+    border-radius: 50%;
+}
+
+.login-container h1 {
+    color: #3CADD4;
+    text-align: center;
+    margin-bottom: 5px;
+    font-size: 2rem;
+}
+
+.gym-name {
+    color: #6B6B6B;
+    text-align: center;
+    margin-bottom: 10px;
+    font-size: 1.3rem;
+    font-weight: 600;
+}
+
+.login-container h2 {
+    color: #6B6B6B;
+    text-align: center;
+    margin-bottom: 30px;
+    font-size: 1.5rem;
+}
+
+.login-info {
+    margin-top: 30px;
+    padding: 20px;
+    background: #f5f5f5;
+    border-radius: 10px;
+    font-size: 0.9rem;
+    color: #666;
+}
+
+.login-info p {
+    margin-bottom: 8px;
+}
+
+.login-info code {
+    background: #e0e0e0;
+    padding: 2px 6px;
+    border-radius: 4px;
+    color: #333;
+    font-family: 'Courier New', monospace;
+}
+
+/* Stili Header Dashboard */
+header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 30px;
+}
+
+.header-content {
+    display: flex;
+    align-items: center;
+    gap: 20px;
+}
+
+.header-text h1 {
+    margin: 0;
+    margin-bottom: 5px;
+}
+
+header h1 {
+    margin: 0;
+}
+
+.btn-logout {
+    background: rgba(255, 255, 255, 0.2);
+    color: white;
+    border: 2px solid white;
+    padding: 10px 20px;
+    border-radius: 8px;
+    font-size: 1rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s;
+}
+
+.btn-logout:hover {
+    background: white;
+    color: #3CADD4;
+}
+
+/* Stili Tab */
+.section-tabs {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 25px;
+    border-bottom: 2px solid #e0e0e0;
+}
+
+.tab-btn {
+    background: transparent;
+    border: none;
+    padding: 12px 24px;
+    font-size: 1rem;
+    font-weight: 600;
+    color: #888;
+    cursor: pointer;
+    transition: all 0.3s;
+    border-bottom: 3px solid transparent;
+    margin-bottom: -2px;
+}
+
+.tab-btn.active {
+    color: #3CADD4;
+    border-bottom-color: #3CADD4;
+}
+
+.tab-btn:hover {
+    color: #3CADD4;
+}
+
+.tab-content {
+    animation: fadeIn 0.3s ease-in;
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* Stili Select */
+select {
+    width: 100%;
+    padding: 10px;
+    border: 2px solid #e0e0e0;
+    border-radius: 8px;
+    font-size: 1rem;
+    background: white;
+    cursor: pointer;
+    transition: border-color 0.3s;
+}
+
+select:focus {
+    outline: none;
+    border-color: #3CADD4;
+}
+
+/* Stili Gestione Account */
+.accounts-list {
+    display: grid;
+    gap: 15px;
+    margin-top: 20px;
+}
+
+.account-card {
+    background: white;
+    border: 2px solid #e0e0e0;
+    border-radius: 10px;
+    padding: 20px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    transition: all 0.3s;
+}
+
+.account-card:hover {
+    border-color: #3CADD4;
+    box-shadow: 0 3px 10px rgba(60, 173, 212, 0.1);
+}
+
+.account-info h4 {
+    color: #3CADD4;
+    margin-bottom: 8px;
+    font-size: 1.2rem;
+}
+
+.account-info p {
+    color: #666;
+    font-size: 0.9rem;
+    margin: 4px 0;
+}
+
+.account-info strong {
+    color: #333;
+}
+
+.btn-delete-account {
+    background: #f44336;
+    color: white;
+    border: none;
+    padding: 10px 20px;
+    border-radius: 8px;
+    font-size: 0.9rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s;
+}
+
+.btn-delete-account:hover {
+    background: #da190b;
+    transform: translateY(-2px);
+}
+
+@media (max-width: 768px) {
+    .account-card {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 15px;
+    }
+    
+    .btn-delete-account {
+        width: 100%;
+    }
+}
+
+@media (max-width: 968px) {
+    main {
+        grid-template-columns: 1fr;
+    }
+
+    .form-row {
+        grid-template-columns: 1fr;
+    }
+
+    .btn-remove {
+        width: 100%;
+        margin-top: 10px;
+    }
+
+    header h1 {
+        font-size: 2rem;
+    }
+}
+
+@media (max-width: 480px) {
+    body {
+        padding: 10px;
+    }
+
+    section {
+        padding: 20px;
+    }
+
+    header h1 {
+        font-size: 1.5rem;
+    }
+}
+

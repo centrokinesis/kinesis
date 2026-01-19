@@ -1,0 +1,195 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Schede di Palestra - Centro Kinesis</title>
+    <link rel="stylesheet" href="styles.css">
+    
+    <!-- Firebase SDK -->
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
+</head>
+<body>
+    <!-- Pagina Login -->
+    <div id="loginPage" class="login-page">
+        <div class="login-container">
+            <img src="logo.jpg" alt="Centro Kinesis Logo" class="login-logo">
+            <h1>Schede Palestra</h1>
+            <p class="gym-name">Centro Kinesis</p>
+            <h2>Login</h2>
+            <form id="loginForm">
+                <div class="form-group">
+                    <label for="username">Username:</label>
+                    <input type="text" id="username" placeholder="Inserisci username" required>
+                </div>
+                <div class="form-group">
+                    <label for="password">Password:</label>
+                    <input type="password" id="password" placeholder="Inserisci password" required>
+                </div>
+                <button type="submit" class="btn-primary">Accedi</button>
+            </form>
+            <div class="login-info">
+                <p><strong>Nota:</strong></p>
+                <p>Contatta l'amministratore per ottenere le credenziali di accesso.</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Dashboard Amministratore -->
+    <div id="adminDashboard" class="container" style="display: none;">
+        <header>
+            <div class="header-content">
+                <img src="logo.jpg" alt="Centro Kinesis Logo" class="header-logo">
+                <div class="header-text">
+                    <h1>Dashboard Amministratore</h1>
+                    <p class="gym-subtitle">Centro Kinesis</p>
+                </div>
+            </div>
+            <button id="logoutBtn" class="btn-logout">Logout</button>
+        </header>
+
+        <main>
+            <section class="create-workout">
+                <div class="section-tabs">
+                    <button class="tab-btn active" onclick="showTab('create')">Crea Scheda</button>
+                    <button class="tab-btn" onclick="showTab('send')">Invia Scheda</button>
+                    <button class="tab-btn" onclick="showTab('accounts')">Gestione Account</button>
+                </div>
+                
+                <div id="createTab" class="tab-content">
+                <h2>Crea Nuova Scheda</h2>
+                <form id="workoutForm">
+                    <div class="form-group">
+                        <label for="workoutName">Nome Scheda:</label>
+                        <input type="text" id="workoutName" placeholder="es. Allenamento Pettorali" required>
+                    </div>
+
+                    <div class="exercises-container">
+                        <h3>Esercizi</h3>
+                        <div id="exercisesList">
+                            <div class="exercise-item">
+                                <div class="form-row">
+                                    <div class="form-group">
+                                        <label>Nome Esercizio:</label>
+                                        <input type="text" class="exercise-name" placeholder="es. Panca piana" required>
+                                    </div>
+                                    <div class="form-group">
+                                        <label>Serie:</label>
+                                        <input type="number" class="exercise-sets" placeholder="3" min="1" required>
+                                    </div>
+                                    <div class="form-group">
+                                        <label>Ripetizioni:</label>
+                                        <input type="number" class="exercise-reps" placeholder="10" min="1" required>
+                                    </div>
+                                    <div class="form-group">
+                                        <label>Peso (kg):</label>
+                                        <input type="number" class="exercise-weight" placeholder="50" min="0" step="0.5">
+                                    </div>
+                                    <button type="button" class="btn-remove" onclick="removeExercise(this)">✕</button>
+                                </div>
+                                <div class="form-group">
+                                    <label>Note:</label>
+                                    <input type="text" class="exercise-notes" placeholder="Note aggiuntive (opzionale)">
+                                </div>
+                                <div class="form-group image-upload-group">
+                                    <label>Immagine Esercizio:</label>
+                                    <div class="image-upload-container">
+                                        <input type="file" class="exercise-image" accept="image/*" onchange="previewImage(this)">
+                                        <div class="image-preview" style="display: none;">
+                                            <img src="" alt="Anteprima">
+                                            <button type="button" class="btn-remove-image" onclick="removeImage(this)">✕ Rimuovi</button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <button type="button" id="addExerciseBtn" class="btn-secondary">+ Aggiungi Esercizio</button>
+                    </div>
+
+                    <button type="submit" class="btn-primary">Salva Scheda</button>
+                </form>
+                </div>
+                
+                <div id="sendTab" class="tab-content" style="display: none;">
+                    <h3>Invia Scheda a Cliente</h3>
+                    <form id="sendWorkoutForm">
+                        <div class="form-group">
+                            <label for="clientSelect">Seleziona Cliente:</label>
+                            <select id="clientSelect" required>
+                                <option value="">-- Scegli un cliente --</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="workoutSelect">Seleziona Scheda:</label>
+                            <select id="workoutSelect" required>
+                                <option value="">-- Scegli una scheda --</option>
+                            </select>
+                        </div>
+                        <button type="submit" class="btn-primary">Invia Scheda</button>
+                    </form>
+                </div>
+                
+                <div id="accountsTab" class="tab-content" style="display: none;">
+                    <h3>Crea Nuovo Account Cliente</h3>
+                    <form id="createAccountForm">
+                        <div class="form-group">
+                            <label for="newClientName">Nome Completo:</label>
+                            <input type="text" id="newClientName" placeholder="es. Marco Verdi" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="newClientUsername">Username:</label>
+                            <input type="text" id="newClientUsername" placeholder="es. marco.verdi" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="newClientPassword">Password:</label>
+                            <input type="password" id="newClientPassword" placeholder="Minimo 6 caratteri" required minlength="6">
+                        </div>
+                        <button type="submit" class="btn-primary">Crea Account</button>
+                    </form>
+                    
+                    <h3 style="margin-top: 30px;">Account Clienti Esistenti</h3>
+                    <div id="accountsList" class="accounts-list">
+                        <p class="empty-state">Caricamento...</p>
+                    </div>
+                </div>
+            </section>
+
+            <section class="workouts-list">
+                <h2>Le Mie Schede</h2>
+                <div id="workoutsContainer">
+                    <p class="empty-state">Nessuna scheda creata. Crea la tua prima scheda!</p>
+                </div>
+            </section>
+        </main>
+    </div>
+
+    <!-- Dashboard Cliente -->
+    <div id="clientDashboard" class="container" style="display: none;">
+        <header>
+            <div class="header-content">
+                <img src="logo.jpg" alt="Centro Kinesis Logo" class="header-logo">
+                <div class="header-text">
+                    <h1>Le Mie Schede</h1>
+                    <p class="gym-subtitle">Centro Kinesis</p>
+                </div>
+            </div>
+            <button id="clientLogoutBtn" class="btn-logout">Logout</button>
+        </header>
+
+        <main>
+            <section class="workouts-list" style="grid-column: 1/-1;">
+                <h2>Schede Ricevute</h2>
+                <div id="clientWorkoutsContainer">
+                    <p class="empty-state">Nessuna scheda ricevuta. Attendi che il tuo trainer te ne invii una!</p>
+                </div>
+            </section>
+        </main>
+    </div>
+
+    <script src="firebase-config.js"></script>
+    <script src="app-firebase.js"></script>
+</body>
+</html>
+
