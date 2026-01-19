@@ -569,12 +569,8 @@ async function handleCreateAccount(e) {
             return;
         }
         
-        // Crea utente in Firebase Auth
-        const email = `${username}@kinesis.local`;
-        const userCredential = await auth.createUserWithEmailAndPassword(email, password);
-        
-        // Salva dati utente in Firestore
-        await db.collection(COLLECTIONS.USERS).doc(userCredential.user.uid).set({
+        // Salva dati utente in Firestore PRIMA di creare in Auth
+        await db.collection(COLLECTIONS.USERS).add({
             username: username,
             password: password, // In produzione: NON salvare password in chiaro!
             name: name,
@@ -582,12 +578,24 @@ async function handleCreateAccount(e) {
             createdAt: firebase.firestore.FieldValue.serverTimestamp()
         });
         
-        alert(`Account creato con successo!\nNome: ${name}\nUsername: ${username}`);
-        document.getElementById('createAccountForm').reset();
+        // Crea utente in Firebase Auth
+        const email = `${username}@kinesis.local`;
         
-        // Logout dell'utente appena creato per tornare all'admin
-        await auth.signOut();
-        await auth.signInWithEmailAndPassword(`${currentUser.username}@kinesis.local`, currentUser.password);
+        // Usa Admin SDK o crea senza login automatico
+        // Per ora creiamo manualmente, senza auto-login
+        try {
+            await auth.createUserWithEmailAndPassword(email, password);
+            // Logout immediato per non perdere sessione admin
+            await auth.signOut();
+            // Re-login come admin
+            await auth.signInWithEmailAndPassword(`${currentUser.username}@kinesis.local`, currentUser.password);
+        } catch (authError) {
+            console.error('Errore creazione in Auth:', authError);
+            // Continua comunque, l'utente potrà fare login e verrà creato in Auth al primo accesso
+        }
+        
+        alert(`Account creato con successo!\nNome: ${name}\nUsername: ${username}\n\nIl cliente può ora fare login con queste credenziali.`);
+        document.getElementById('createAccountForm').reset();
         
         displayAccountsList();
         
@@ -636,7 +644,7 @@ async function deleteAccount(userId) {
         
         const user = userDoc.data();
         
-        if (!confirm(`Sei sicuro di voler eliminare l'account di ${user.name}?\nQuesta azione eliminerà anche tutte le schede associate.`)) {
+        if (!confirm(`Sei sicuro di voler eliminare l'account di ${user.name}?\nQuesta azione eliminerà anche tutte le schede associate.\n\nNOTA: L'utente sarà rimosso dal database ma potrebbe rimanere in Firebase Authentication.`)) {
             return;
         }
         
@@ -651,12 +659,16 @@ async function deleteAccount(userId) {
         const deletePromises = assignments.docs.map(doc => doc.ref.delete());
         await Promise.all(deletePromises);
         
-        alert('Account eliminato con successo.');
+        // NOTA: Non possiamo eliminare da Firebase Auth lato client
+        // Per farlo serve Firebase Admin SDK lato server
+        // L'utente non potrà più accedere perché non esiste in Firestore
+        
+        alert('Account eliminato con successo dal database.');
         displayAccountsList();
         populateClientSelect();
         
     } catch (error) {
         console.error('Errore eliminazione account:', error);
-        alert('Errore durante l\'eliminazione');
+        alert('Errore durante l\'eliminazione: ' + error.message);
     }
 }
