@@ -34,13 +34,27 @@ document.addEventListener('DOMContentLoaded', () => {
 function checkAuthState() {
     auth.onAuthStateChanged(async (user) => {
         if (user) {
-            // Carica dati utente da Firestore
-            const userDoc = await db.collection(COLLECTIONS.USERS).doc(user.uid).get();
-            if (userDoc.exists) {
-                currentUser = { uid: user.uid, ...userDoc.data() };
+            console.log('Auth state changed, user logged in:', user.email);
+            
+            // Estrai username dall'email
+            const username = user.email.split('@')[0];
+            
+            // Cerca utente in Firestore per username
+            const usersSnapshot = await db.collection(COLLECTIONS.USERS)
+                .where('username', '==', username)
+                .get();
+            
+            if (!usersSnapshot.empty) {
+                const userData = usersSnapshot.docs[0].data();
+                currentUser = { uid: user.uid, ...userData };
+                console.log('Dashboard aperta per ruolo:', currentUser.role);
                 showDashboard(currentUser.role);
+            } else {
+                console.log('Utente non trovato in Firestore');
+                await auth.signOut();
             }
         } else {
+            console.log('Nessun utente autenticato');
             showLoginPage();
         }
     });
