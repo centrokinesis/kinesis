@@ -65,11 +65,16 @@
                         <h3>Esercizi</h3>
                         <div id="exercisesList">
                             <div class="exercise-item">
+                                <div class="form-group image-search-group">
+                                    <label>Cerca Esercizio:</label>
+                                    <input type="text" class="exercise-search" placeholder="Cerca esercizio... (es. panca, squat, crunch)" autocomplete="off">
+                                    <div class="search-results" style="display: none;"></div>
+                                    <input type="hidden" class="exercise-image-path">
+                                </div>
+                                <div class="image-preview-box" style="display: none;">
+                                    <img src="" alt="Anteprima" class="preview-img">
+                                </div>
                                 <div class="form-row">
-                                    <div class="form-group">
-                                        <label>Nome Esercizio:</label>
-                                        <input type="text" class="exercise-name" placeholder="es. Panca piana" required>
-                                    </div>
                                     <div class="form-group">
                                         <label>Serie:</label>
                                         <input type="number" class="exercise-sets" placeholder="3" min="1" required>
@@ -79,23 +84,14 @@
                                         <input type="number" class="exercise-reps" placeholder="10" min="1" required>
                                     </div>
                                     <div class="form-group">
-                                        <label>Peso (kg):</label>
-                                        <input type="number" class="exercise-weight" placeholder="50" min="0" step="0.5">
+                                        <label>Recupero (sec):</label>
+                                        <input type="number" class="exercise-rest" placeholder="60" min="0" step="15">
                                     </div>
                                     <button type="button" class="btn-remove" onclick="removeExercise(this)">✕</button>
                                 </div>
                                 <div class="form-group">
                                     <label>Note:</label>
                                     <input type="text" class="exercise-notes" placeholder="Note aggiuntive (opzionale)">
-                                </div>
-                                <div class="form-group image-select-group">
-                                    <label>Immagine Esercizio:</label>
-                                    <select class="exercise-image-select" onchange="updateImagePreview(this)">
-                                        <!-- Opzioni popolate via JS -->
-                                    </select>
-                                    <div class="image-preview-box" style="display: none;">
-                                        <img src="" alt="Anteprima" class="preview-img">
-                                    </div>
                                 </div>
                             </div>
                         </div>

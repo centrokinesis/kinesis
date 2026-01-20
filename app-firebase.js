@@ -15,8 +15,8 @@ const COLLECTIONS = {
 document.addEventListener('DOMContentLoaded', () => {
     checkAuthState();
     
-    // Popola i select delle immagini
-    populateImageSelects();
+    // Setup ricerca esercizi
+    setupExerciseSearch();
     
     // Event listeners per login
     document.getElementById('loginForm').addEventListener('submit', handleLogin);
@@ -31,6 +31,15 @@ document.addEventListener('DOMContentLoaded', () => {
     if (clientLogoutBtn) {
         clientLogoutBtn.addEventListener('click', handleLogout);
     }
+    
+    // Chiudi risultati ricerca quando si clicca fuori
+    document.addEventListener('click', (e) => {
+        if (!e.target.closest('.image-search-group')) {
+            document.querySelectorAll('.search-results').forEach(el => {
+                el.style.display = 'none';
+            });
+        }
+    });
 });
 
 // Controlla stato autenticazione
@@ -201,17 +210,22 @@ async function handleFormSubmit(e) {
     
     const exercises = [];
     exerciseItems.forEach(item => {
-        const name = item.querySelector('.exercise-name').value.trim();
         const sets = parseInt(item.querySelector('.exercise-sets').value);
         const reps = parseInt(item.querySelector('.exercise-reps').value);
-        const weight = parseFloat(item.querySelector('.exercise-weight').value) || 0;
+        const rest = parseInt(item.querySelector('.exercise-rest').value) || 60;
         const notes = item.querySelector('.exercise-notes').value.trim();
         
-        // Ottieni l'immagine selezionata dal select
-        const imageSelect = item.querySelector('.exercise-image-select');
-        const image = imageSelect ? imageSelect.value : '';
+        // Ottieni l'immagine e il nome dall'esercizio selezionato
+        const imagePath = item.querySelector('.exercise-image-path').value;
+        const searchInput = item.querySelector('.exercise-search');
+        const exerciseName = searchInput ? searchInput.getAttribute('data-selected-name') || searchInput.value.trim() : '';
         
-        exercises.push({ name, sets, reps, weight, notes, image });
+        if (!exerciseName) {
+            alert('Seleziona un esercizio dalla ricerca!');
+            return;
+        }
+        
+        exercises.push({ name: exerciseName, sets, reps, rest, notes, image: imagePath });
     });
     
     const workout = {
@@ -247,9 +261,14 @@ function resetExercisesList() {
     
     const firstExercise = exercisesList.querySelector('.exercise-item');
     if (firstExercise) {
-        const imageSelect = firstExercise.querySelector('.exercise-image-select');
+        const searchInput = firstExercise.querySelector('.exercise-search');
+        const imagePath = firstExercise.querySelector('.exercise-image-path');
         const previewBox = firstExercise.querySelector('.image-preview-box');
-        if (imageSelect) imageSelect.value = '';
+        if (searchInput) {
+            searchInput.value = '';
+            searchInput.removeAttribute('data-selected-name');
+        }
+        if (imagePath) imagePath.value = '';
         if (previewBox) previewBox.style.display = 'none';
     }
 }
@@ -282,10 +301,10 @@ function displayWorkouts() {
                                 ${exercise.image ? `<div class="exercise-image-display"><img src="${exercise.image}" alt="${exercise.name}" onerror="this.parentElement.style.display='none'"></div>` : ''}
                                 <div class="exercise-info">
                                     <strong>${exercise.name}</strong>
-                                    <div class="exercise-details">
-                                        ${exercise.sets} serie × ${exercise.reps} ripetizioni
-                                        ${exercise.weight > 0 ? ` • ${exercise.weight} kg` : ''}
-                                    </div>
+                            <div class="exercise-details">
+                                ${exercise.sets} serie × ${exercise.reps} ripetizioni
+                                ${exercise.rest ? ` • Recupero: ${exercise.rest}s` : ''}
+                            </div>
                                     ${exercise.notes ? `<div class="exercise-notes">Note: ${exercise.notes}</div>` : ''}
                                 </div>
                             </div>
@@ -351,14 +370,29 @@ function addExerciseField() {
             <label>Note:</label>
             <input type="text" class="exercise-notes" placeholder="Note aggiuntive (opzionale)">
         </div>
-        <div class="form-group image-select-group">
-            <label>Immagine Esercizio:</label>
-            <select class="exercise-image-select" onchange="updateImagePreview(this)">
-                ${generateImageOptions()}
-            </select>
-            <div class="image-preview-box" style="display: none;">
-                <img src="" alt="Anteprima" class="preview-img">
+        <div class="form-group image-search-group">
+            <label>Cerca Esercizio:</label>
+            <input type="text" class="exercise-search" placeholder="Cerca esercizio..." autocomplete="off" onkeyup="handleExerciseSearch(this)" onfocus="handleExerciseSearch(this)">
+            <div class="search-results" style="display: none;"></div>
+            <input type="hidden" class="exercise-image-path">
+        </div>
+        <div class="image-preview-box" style="display: none;">
+            <img src="" alt="Anteprima" class="preview-img">
+        </div>
+        <div class="form-row">
+            <div class="form-group">
+                <label>Serie:</label>
+                <input type="number" class="exercise-sets" placeholder="3" min="1" required>
             </div>
+            <div class="form-group">
+                <label>Ripetizioni:</label>
+                <input type="number" class="exercise-reps" placeholder="10" min="1" required>
+            </div>
+            <div class="form-group">
+                <label>Recupero (sec):</label>
+                <input type="number" class="exercise-rest" placeholder="60" min="0" step="15">
+            </div>
+            <button type="button" class="btn-remove" onclick="removeExercise(this)">✕</button>
         </div>
     `;
     exercisesList.appendChild(exerciseItem);
@@ -376,34 +410,75 @@ function removeExercise(button) {
     }
 }
 
-// Popola tutti i select delle immagini
-function populateImageSelects() {
-    const selects = document.querySelectorAll('.exercise-image-select');
-    selects.forEach(select => {
-        select.innerHTML = generateImageOptions();
+// Setup ricerca esercizi per tutti i campi
+function setupExerciseSearch() {
+    document.querySelectorAll('.exercise-search').forEach(input => {
+        input.addEventListener('keyup', function() {
+            handleExerciseSearch(this);
+        });
+        input.addEventListener('focus', function() {
+            handleExerciseSearch(this);
+        });
     });
 }
 
-// Genera le opzioni del select immagini
-function generateImageOptions() {
-    return exerciseImages.map((img, index) => 
-        `<option value="${img.path}">${img.name}</option>`
-    ).join('');
+// Gestisci ricerca esercizi
+function handleExerciseSearch(input) {
+    const searchGroup = input.closest('.image-search-group');
+    const resultsDiv = searchGroup.querySelector('.search-results');
+    const query = input.value.toLowerCase().trim();
+    
+    if (query.length < 2) {
+        resultsDiv.style.display = 'none';
+        return;
+    }
+    
+    // Filtra esercizi
+    const filtered = exerciseImages.filter(ex => 
+        ex.name.toLowerCase().includes(query) && ex.path !== ''
+    ).slice(0, 20); // Max 20 risultati
+    
+    if (filtered.length === 0) {
+        resultsDiv.innerHTML = '<div class="search-no-results">Nessun esercizio trovato</div>';
+        resultsDiv.style.display = 'block';
+        return;
+    }
+    
+    // Mostra risultati
+    resultsDiv.innerHTML = filtered.map(ex => `
+        <div class="search-result-item" onclick="selectExercise(this, '${ex.name.replace(/'/g, "\\'")  }', '${ex.path}')">
+            <span>${ex.name}</span>
+        </div>
+    `).join('');
+    
+    resultsDiv.style.display = 'block';
 }
 
-// Aggiorna anteprima immagine quando cambia la selezione
-function updateImagePreview(select) {
-    const exerciseItem = select.closest('.exercise-item');
+// Seleziona esercizio dalla ricerca
+function selectExercise(element, name, path) {
+    const searchGroup = element.closest('.image-search-group');
+    const input = searchGroup.querySelector('.exercise-search');
+    const pathInput = searchGroup.querySelector('.exercise-image-path');
+    const resultsDiv = searchGroup.querySelector('.search-results');
+    const exerciseItem = searchGroup.closest('.exercise-item');
     const previewBox = exerciseItem.querySelector('.image-preview-box');
     const img = previewBox.querySelector('.preview-img');
     
-    if (select.value) {
-        img.src = select.value;
+    // Imposta valori
+    input.value = name;
+    input.setAttribute('data-selected-name', name);
+    pathInput.value = path;
+    
+    // Mostra anteprima
+    if (path) {
+        img.src = path;
         previewBox.style.display = 'block';
     } else {
-        img.src = '';
         previewBox.style.display = 'none';
     }
+    
+    // Nascondi risultati
+    resultsDiv.style.display = 'none';
 }
 
 // Gestione tab
@@ -568,7 +643,7 @@ function displayClientWorkouts(workoutsList) {
                                     <strong>${exercise.name}</strong>
                                     <div class="exercise-details">
                                         ${exercise.sets} serie × ${exercise.reps} ripetizioni
-                                        ${exercise.weight > 0 ? ` • ${exercise.weight} kg` : ''}
+                                        ${exercise.rest ? ` • Recupero: ${exercise.rest}s` : ''}
                                     </div>
                                     ${exercise.notes ? `<div class="exercise-notes">Note: ${exercise.notes}</div>` : ''}
                                 </div>

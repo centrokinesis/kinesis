@@ -291,24 +291,69 @@ h3 {
     margin-top: 5px;
 }
 
-.image-select-group {
-    margin-top: 10px;
+.image-search-group {
+    position: relative;
+    margin-bottom: 15px;
 }
 
-.exercise-image-select {
+.exercise-search {
     width: 100%;
-    padding: 10px;
+    padding: 12px;
     border: 2px solid #e0e0e0;
     border-radius: 8px;
     font-size: 1rem;
-    background: white;
-    cursor: pointer;
     transition: border-color 0.3s;
 }
 
-.exercise-image-select:focus {
+.exercise-search:focus {
     outline: none;
     border-color: #3CADD4;
+}
+
+.search-results {
+    position: absolute;
+    top: 100%;
+    left: 0;
+    right: 0;
+    max-height: 300px;
+    overflow-y: auto;
+    background: white;
+    border: 2px solid #3CADD4;
+    border-radius: 8px;
+    margin-top: 5px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    z-index: 1000;
+}
+
+.search-result-item {
+    padding: 12px;
+    cursor: pointer;
+    border-bottom: 1px solid #f0f0f0;
+    transition: background 0.2s;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.search-result-item:hover {
+    background: #f5f9fc;
+}
+
+.search-result-item:last-child {
+    border-bottom: none;
+}
+
+.search-result-category {
+    font-size: 0.85rem;
+    color: #666;
+    font-weight: 500;
+}
+
+.search-no-results {
+    padding: 20px;
+    text-align: center;
+    color: #999;
+    font-style: italic;
 }
 
 .image-preview-box {
