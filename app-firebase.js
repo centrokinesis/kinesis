@@ -174,6 +174,8 @@ function showDashboard(role) {
 function setupAdminDashboard() {
     const workoutForm = document.getElementById('workoutForm');
     if (workoutForm) {
+        // Disabilita la validazione HTML5 per permettere campi vuoti
+        workoutForm.setAttribute('novalidate', 'true');
         workoutForm.removeEventListener('submit', handleFormSubmit);
         workoutForm.addEventListener('submit', handleFormSubmit);
     }
@@ -259,12 +261,21 @@ function resetExercisesList() {
         const searchInput = firstExercise.querySelector('.exercise-search');
         const imagePath = firstExercise.querySelector('.exercise-image-path');
         const previewBox = firstExercise.querySelector('.image-preview-box');
+        const setsInput = firstExercise.querySelector('.exercise-sets');
+        const repsInput = firstExercise.querySelector('.exercise-reps');
+        const restInput = firstExercise.querySelector('.exercise-rest');
+        const notesInput = firstExercise.querySelector('.exercise-notes');
+        
         if (searchInput) {
             searchInput.value = '';
             searchInput.removeAttribute('data-selected-name');
         }
         if (imagePath) imagePath.value = '';
         if (previewBox) previewBox.style.display = 'none';
+        if (setsInput) setsInput.value = '';
+        if (repsInput) repsInput.value = '';
+        if (restInput) restInput.value = '';
+        if (notesInput) notesInput.value = '';
     }
 }
 
@@ -292,7 +303,7 @@ function displayWorkouts() {
                                     <div class="exercise-info">
                                         <strong>${ex.name}</strong>
                                         <div class="exercise-details">
-                                            ${ex.sets}x${ex.reps} — Rec: ${ex.rest}s
+                                            ${ex.sets}x${ex.reps}${ex.rest ? ` — Rec: ${ex.rest}s` : ''}
                                         </div>
                                         ${ex.notes ? `<div class="exercise-notes">${ex.notes}</div>` : ''}
                                     </div>
@@ -350,11 +361,11 @@ function addExerciseField() {
         <div class="form-row">
             <div class="form-group">
                 <label>Serie:</label>
-                <input type="number" class="exercise-sets" placeholder="3" min="1" required>
+                <input type="number" class="exercise-sets" placeholder="3" min="1">
             </div>
             <div class="form-group">
                 <label>Ripetizioni:</label>
-                <input type="number" class="exercise-reps" placeholder="10" min="1" required>
+                <input type="number" class="exercise-reps" placeholder="10" min="1">
             </div>
             <div class="form-group">
                 <label>Recupero (sec):</label>
@@ -399,7 +410,7 @@ function setupExerciseSearch() {
         style.id = 'search-results-styles';
         style.textContent = `
             .image-search-group { position: relative; }
-            .search-results { position: absolute; left: 0; top: 100%; background: #fff; border: 1px solid #ddd; z-index: 1000; width: 100%; max-height: 260px; overflow-y: auto; box-shadow: 0 4px 12px rgba(0,0,0,0.08); padding: 4px 0; }
+            .search-results { position: absolute; left: 0; top: 100%; background: #fff; border: 1px solid #ddd; z-index: 1000; width: 100%; max-height: 500px; overflow-y: auto; box-shadow: 0 4px 12px rgba(0,0,0,0.08); padding: 4px 0; }
             .search-result-item { display:flex; align-items:center; gap:10px; padding:6px 8px; cursor:pointer; }
             .search-result-item:hover { background: #f6f8fa; }
             .search-result-item .result-thumb { width:44px; height:44px; object-fit:cover; border-radius:6px; flex:0 0 44px; }
@@ -433,7 +444,7 @@ function handleExerciseSearch(input) {
     // Filtra esercizi
     const filtered = exerciseImages.filter(ex => 
         ex.name.toLowerCase().includes(query) && ex.path !== ''
-    ).slice(0, 20); // Max 20 risultati
+    ); // Rimosso il limite di 20 risultati
     
     if (filtered.length === 0) {
         resultsDiv.innerHTML = '<div class="search-no-results">Nessun esercizio trovato</div>';
