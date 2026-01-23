@@ -89,11 +89,19 @@ async function handleLogin(e) {
     
     console.log('Tentativo login:', username);
     
+    // Verifica che Firebase sia inizializzato
+    if (typeof auth === 'undefined') {
+        console.error('Firebase auth non è inizializzato!');
+        alert('Errore: Firebase non è inizializzato. Ricarica la pagina.');
+        return;
+    }
+    
     try {
-        // Login con Firebase Auth usando email fittizia
+        // Login con Firebase Auth usando email
         const email = `${username}@kinesis.local`;
         
         console.log('Tentativo auth con email:', email);
+        console.log('Auth object disponibile:', !!auth);
         
         // Prova a fare login
         const userCredential = await auth.signInWithEmailAndPassword(email, password);
@@ -123,12 +131,18 @@ async function handleLogin(e) {
         // Il cambio di pagina sarà gestito da onAuthStateChanged
         
     } catch (error) {
-        console.error('Errore login completo:', error);
+        console.error('Errore login:', error);
+        console.error('Error code:', error.code);
+        console.error('Error message:', error.message);
         
-        if (error.code === 'auth/user-not-found' || error.code === 'auth/wrong-password') {
-            alert('Username o password errati!');
+        if (error.code === 'auth/user-not-found') {
+            alert('Utente non trovato. Verifica l\'username inserito.');
+        } else if (error.code === 'auth/wrong-password') {
+            alert('Password errata!');
         } else if (error.code === 'auth/invalid-email') {
             alert('Email non valida!');
+        } else if (error.code === 'auth/invalid-login-credentials') {
+            alert('Username o password errati!');
         } else {
             alert('Errore durante il login: ' + error.message);
         }
