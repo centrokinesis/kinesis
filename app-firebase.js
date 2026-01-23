@@ -393,6 +393,22 @@ function removeExercise(button) {
 
 // Setup ricerca esercizi per tutti i campi
 function setupExerciseSearch() {
+    // Inietta stili per i risultati di ricerca (una sola volta)
+    if (!document.getElementById('search-results-styles')) {
+        const style = document.createElement('style');
+        style.id = 'search-results-styles';
+        style.textContent = `
+            .image-search-group { position: relative; }
+            .search-results { position: absolute; left: 0; top: 100%; background: #fff; border: 1px solid #ddd; z-index: 1000; width: 100%; max-height: 260px; overflow-y: auto; box-shadow: 0 4px 12px rgba(0,0,0,0.08); padding: 4px 0; }
+            .search-result-item { display:flex; align-items:center; gap:10px; padding:6px 8px; cursor:pointer; }
+            .search-result-item:hover { background: #f6f8fa; }
+            .search-result-item .result-thumb { width:44px; height:44px; object-fit:cover; border-radius:6px; flex:0 0 44px; }
+            .search-result-item .result-name { font-size:14px; color:#222; }
+            .search-no-results { padding:8px 10px; color:#666; }
+        `;
+        document.head.appendChild(style);
+    }
+
     document.querySelectorAll('.exercise-search').forEach(input => {
         input.addEventListener('keyup', function() {
             handleExerciseSearch(this);
@@ -425,10 +441,11 @@ function handleExerciseSearch(input) {
         return;
     }
     
-    // Mostra risultati
+    // Mostra risultati con miniatura
     resultsDiv.innerHTML = filtered.map(ex => `
         <div class="search-result-item" onclick="selectExercise(this, '${ex.name.replace(/'/g, "\\'")  }', '${ex.path}')">
-            <span>${ex.name}</span>
+            <img src="${ex.path}" class="result-thumb" onerror="this.style.display='none'" alt="thumb">
+            <span class="result-name">${ex.name}</span>
         </div>
     `).join('');
     
