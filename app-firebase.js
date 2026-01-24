@@ -862,27 +862,42 @@ function renderWorkoutDaysHTML(workout) {
     if (!workout.days) return '<p>Nessun esercizio presente.</p>';
 
     return Object.entries(workout.days).map(([day, exercises]) => `
-        <div class="day-group" style="margin-bottom: 30px;">
-            <h4 style="color: #3CADD4; border-bottom: 2px solid #3CADD4; padding-bottom: 5px; margin-bottom: 15px;">Giorno ${day}</h4>
-            ${exercises.map(ex => `
-                <div class="exercise-entry">
-                    ${ex.image ? `
-                        <div class="exercise-image-display">
-                            <img src="${ex.image}" alt="${ex.name}" onclick="window.open(this.src, '_blank')">
+        <div class="day-group" style="margin-bottom: 20px;">
+            <div class="day-header" onclick="toggleDayExercises(this)" style="cursor: pointer; display: flex; align-items: center; padding: 12px; background-color: #f0f0f0; border-radius: 5px; user-select: none;">
+                <span class="day-toggle-icon" style="display: inline-block; width: 20px; text-align: center; font-size: 16px; margin-right: 10px; transition: transform 0.3s;">▶</span>
+                <h4 style="color: #3CADD4; margin: 0; flex: 1; font-size: 1rem;">Giorno ${day} (${exercises.length} esercizi)</h4>
+            </div>
+            <div class="day-exercises" style="display: none; padding-left: 20px; margin-top: 10px; border-left: 3px solid #3CADD4;">
+                ${exercises.map(ex => `
+                    <div class="exercise-entry">
+                        ${ex.image ? `
+                            <div class="exercise-image-display">
+                                <img src="${ex.image}" alt="${ex.name}" onclick="window.open(this.src, '_blank')">
+                            </div>
+                        ` : ''}
+                        <div class="exercise-info">
+                            <strong>${ex.name}</strong>
+                            <div class="exercise-details">
+                                <span style="font-size: 1.1rem; color: #333;">${ex.sets} serie</span> x <span style="font-size: 1.1rem; color: #333;">${ex.reps} rep</span>
+                            </div>
+                            <div class="exercise-rest">Recupero: ${ex.rest}s</div>
+                            ${ex.notes ? `<div class="exercise-notes">Note: ${ex.notes}</div>` : ''}
                         </div>
-                    ` : ''}
-                    <div class="exercise-info">
-                        <strong>${ex.name}</strong>
-                        <div class="exercise-details">
-                            <span style="font-size: 1.1rem; color: #333;">${ex.sets} serie</span> x <span style="font-size: 1.1rem; color: #333;">${ex.reps} rep</span>
-                        </div>
-                        <div class="exercise-rest">Recupero: ${ex.rest}s</div>
-                        ${ex.notes ? `<div class="exercise-notes">Note: ${ex.notes}</div>` : ''}
                     </div>
-                </div>
-            `).join('')}
+                `).join('')}
+            </div>
         </div>
     `).join('');
+}
+
+function toggleDayExercises(headerElement) {
+    const exercisesContainer = headerElement.nextElementSibling;
+    const icon = headerElement.querySelector('.day-toggle-icon');
+    
+    const isHidden = exercisesContainer.style.display === 'none';
+    
+    exercisesContainer.style.display = isHidden ? 'block' : 'none';
+    icon.style.transform = isHidden ? 'rotate(90deg)' : 'rotate(0deg)';
 }
 
 async function editWorkout(id) {
