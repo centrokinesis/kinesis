@@ -896,7 +896,8 @@ function renderWorkoutDaysHTML(workout) {
 }
 
 function toggleDayExercises(headerElement) {
-    const exercisesContainer = headerElement.nextElementSibling;
+    const dayGroup = headerElement.closest('.day-group');
+    const exercisesContainer = dayGroup.querySelector('.day-exercises');
     const icon = headerElement.querySelector('.day-toggle-icon');
     
     const isHidden = exercisesContainer.style.display === 'none';
