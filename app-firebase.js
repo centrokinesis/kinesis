@@ -39,6 +39,21 @@ document.addEventListener('DOMContentLoaded', () => {
     if (clientLogoutBtn) {
         clientLogoutBtn.addEventListener('click', handleLogout);
     }
+
+    // Ensure print button uses green background and logout buttons are consistent
+    if (!document.getElementById('app-custom-button-styles')) {
+        const style = document.createElement('style');
+        style.id = 'app-custom-button-styles';
+        style.textContent = `
+            /* Make action buttons consistent in size */
+            .workout-actions button { padding: 8px 12px !important; font-size: 14px !important; border-radius: 4px !important; border: none !important; }
+            /* Print/Salva button: same sizing but green background */
+            .btn-print { background-color: #28a745 !important; color: #fff !important; padding: 8px 12px !important; font-size: 14px !important; display: inline-flex !important; align-items: center; justify-content: center; }
+            /* Make logout buttons slightly smaller to avoid overlapping text */
+            #logoutBtn, #clientLogoutBtn { padding: 6px 10px !important; font-size: 13px !important; height: auto !important; line-height: normal !important; }
+        `;
+        document.head.appendChild(style);
+    }
     
     // Chiudi risultati ricerca quando si clicca fuori
     document.addEventListener('click', (e) => {
@@ -333,9 +348,7 @@ function displayWorkouts() {
                         <div class="workout-actions" style="margin-top: 15px; display: flex; gap: 10px; flex-wrap: wrap; align-items: center;">
                             <button class="btn-edit" onclick="event.stopPropagation(); editWorkout('${workout.id}')">Modifica</button>
                             <button class="btn-delete" onclick="event.stopPropagation(); deleteWorkout('${workout.id}')">Elimina</button>
-                            <button class="btn-print" title="Salva" aria-label="Salva" onclick="event.stopPropagation(); printWorkout('${workout.id}')" style="background-color: #28a745; border: none; color: white; padding: 6px; border-radius: 4px; cursor: pointer; font-size: 12px; display: inline-flex; align-items: center; justify-content: center;">
-                                <img src="save-logo.png" alt="Salva" style="width:18px;height:18px;display:block;">
-                            </button>
+                            <button class="btn-edit btn-print" title="Salva" aria-label="Salva" onclick="event.stopPropagation(); printWorkout('${workout.id}')">Salva</button>
                         </div>
                 </div>
             </div>
@@ -674,9 +687,7 @@ function displayClientWorkouts(workoutsList) {
                     ${renderWorkoutDaysHTML(workout)}
                 </div>
                 <div class="workout-actions" style="margin-top: 15px; display: flex; gap: 10px; flex-wrap: wrap; align-items: center;">
-                    <button class="btn-print" title="Salva" aria-label="Salva" onclick="event.stopPropagation(); printWorkout('${workout.id}')" style="background-color: #28a745; border: none; color: white; padding: 6px; border-radius: 4px; cursor: pointer; font-size: 12px; display: inline-flex; align-items: center; justify-content: center;">
-                        <img src="save-logo.png" alt="Salva" style="width:18px;height:18px;display:block;">
-                    </button>
+                    <button class="btn-edit btn-print" title="Salva" aria-label="Salva" onclick="event.stopPropagation(); printWorkout('${workout.id}')">Salva</button>
                 </div>
             </div>
         </div>
