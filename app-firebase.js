@@ -333,6 +333,7 @@ function displayWorkouts() {
                         <div class="workout-actions" style="margin-top: 15px; display: flex; gap: 10px;">
                             <button class="btn-edit" onclick="event.stopPropagation(); editWorkout('${workout.id}')">Modifica</button>
                             <button class="btn-delete" onclick="event.stopPropagation(); deleteWorkout('${workout.id}')">Elimina</button>
+                            <button class="btn-print" onclick="event.stopPropagation(); printWorkout('${workout.id}')" style="background-color: #28a745; border: none; color: white; padding: 8px 12px; border-radius: 4px; cursor: pointer; font-size: 14px;">🖨️ Stampa</button>
                         </div>
                 </div>
             </div>
@@ -670,6 +671,9 @@ function displayClientWorkouts(workoutsList) {
                 <div class="workout-body">
                     ${renderWorkoutDaysHTML(workout)}
                 </div>
+                <div class="workout-actions" style="margin-top: 15px; display: flex; gap: 10px;">
+                    <button class="btn-print" onclick="event.stopPropagation(); printWorkout('${workout.id}')" style="background-color: #28a745; border: none; color: white; padding: 8px 12px; border-radius: 4px; cursor: pointer; font-size: 14px;">🖨️ Stampa</button>
+                </div>
             </div>
         </div>
     `).join('');
@@ -964,5 +968,238 @@ function loadExercisesForCurrentDay() {
             preview.querySelector('.preview-img').src = ex.image;
             preview.style.display = 'block';
         }
+    });
+}
+
+// Stampa scheda con layout a griglia 3 colonne
+function printWorkout(workoutId) {
+    const workout = workouts.find(w => w.id === workoutId);
+    if (!workout) {
+        alert('Scheda non trovata!');
+        return;
+    }
+
+    // Crea una finestra di stampa
+    const printWindow = window.open('', '', 'width=1000,height=800');
+    
+    // Costruisci l'HTML per la stampa
+    let html = `
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>${workout.name}</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: Arial, sans-serif;
+            background: white;
+            color: #333;
+            padding: 20px;
+        }
+        
+        .print-container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        
+        .print-header {
+            text-align: center;
+            margin-bottom: 30px;
+            border-bottom: 3px solid #3CADD4;
+            padding-bottom: 15px;
+        }
+        
+        .print-header h1 {
+            color: #3CADD4;
+            font-size: 28px;
+            margin-bottom: 10px;
+        }
+        
+        .day-section {
+            margin-bottom: 40px;
+            page-break-inside: avoid;
+        }
+        
+        .day-title {
+            background-color: #3CADD4;
+            color: white;
+            padding: 12px 20px;
+            font-size: 18px;
+            font-weight: bold;
+            margin-bottom: 20px;
+            border-radius: 4px;
+        }
+        
+        .exercises-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+        
+        .exercise-card {
+            border: 2px solid #3CADD4;
+            border-radius: 8px;
+            overflow: hidden;
+            background: #f9f9f9;
+            page-break-inside: avoid;
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .exercise-image {
+            background: #f0f0f0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 10px;
+            min-height: 100px;
+        }
+        
+        .exercise-image img {
+            max-width: 100%;
+            max-height: 400px;
+            width: auto;
+            height: auto;
+            object-fit: contain;
+        }
+        
+        .exercise-details {
+            padding: 15px;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            flex-grow: 1;
+        }
+        
+        .exercise-name {
+            font-size: 16px;
+            font-weight: bold;
+            color: #333;
+            text-transform: capitalize;
+            line-height: 1.2;
+        }
+        
+        .exercise-sets-reps {
+            font-size: 14px;
+            color: #3CADD4;
+            font-weight: bold;
+        }
+        
+        .exercise-recovery {
+            font-size: 13px;
+            color: #666;
+        }
+        
+        .exercise-notes {
+            font-size: 12px;
+            color: #555;
+            font-style: italic;
+            margin-top: 5px;
+            padding-top: 5px;
+            border-top: 1px solid #ddd;
+        }
+        
+        .no-exercises {
+            text-align: center;
+            padding: 30px;
+            color: #999;
+            font-size: 14px;
+        }
+        
+        @media print {
+            body {
+                padding: 10px;
+            }
+            
+            .print-container {
+                max-width: 100%;
+            }
+            
+            .exercises-grid {
+                gap: 15px;
+            }
+            
+            .exercise-card {
+                break-inside: avoid;
+            }
+            
+            .day-section {
+                page-break-inside: avoid;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="print-container">
+        <div class="print-header">
+            <h1>${workout.name}</h1>
+            <p style="color: #666; margin-top: 5px;">Scheda di allenamento</p>
+        </div>
+    `;
+
+    // Aggiungi i giorni e gli esercizi
+    if (workout.days && Object.keys(workout.days).length > 0) {
+        Object.entries(workout.days).forEach(([day, exercises]) => {
+            html += `
+        <div class="day-section">
+            <div class="day-title">Giorno ${day}</div>
+            <div class="exercises-grid">
+            `;
+            
+            if (exercises && exercises.length > 0) {
+                exercises.forEach(ex => {
+                    html += `
+                <div class="exercise-card">
+                    ${ex.image ? `
+                    <div class="exercise-image">
+                        <img src="${ex.image}" alt="${ex.name}">
+                    </div>
+                    ` : '<div class="exercise-image" style="background: #e8e8e8;"><p style="color: #999;">Nessuna immagine</p></div>'}
+                    <div class="exercise-details">
+                        <div class="exercise-name">${ex.name}</div>
+                        <div class="exercise-sets-reps">${ex.sets} serie × ${ex.reps} ripetizioni</div>
+                        ${ex.rest ? `<div class="exercise-recovery">Recupero: ${ex.rest}s</div>` : ''}
+                        ${ex.notes ? `<div class="exercise-notes">${ex.notes}</div>` : ''}
+                    </div>
+                </div>
+                    `;
+                });
+            } else {
+                html += '<div class="no-exercises">Nessun esercizio per questo giorno</div>';
+            }
+            
+            html += `
+            </div>
+        </div>
+            `;
+        });
+    } else {
+        html += '<p class="no-exercises">Nessun esercizio presente nella scheda.</p>';
+    }
+
+    html += `
+    </div>
+</body>
+</html>
+    `;
+
+    printWindow.document.write(html);
+    printWindow.document.close();
+    
+    // Stampa automatica quando la pagina si carica
+    printWindow.addEventListener('load', function() {
+        printWindow.print();
+        // Chiudi la finestra dopo la stampa
+        printWindow.addEventListener('afterprint', function() {
+            printWindow.close();
+        });
     });
 }
