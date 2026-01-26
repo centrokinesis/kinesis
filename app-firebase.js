@@ -1150,6 +1150,15 @@ function printWorkout(workoutId) {
                 page-break-inside: avoid;
             }
         }
+        /* Responsive per schermi piccoli (migliora layout su mobile) */
+        @media (max-width: 800px) {
+            .print-header h1 { font-size: 20px; }
+            .day-title { font-size: 16px; padding: 10px 14px; }
+            .exercises-grid { grid-template-columns: repeat(1, 1fr); gap: 12px; }
+            .exercise-image { min-height: 80px; }
+            .exercise-details { padding: 10px; }
+            body { padding: 10px; }
+        }
     </style>
 </head>
 <body>
@@ -1208,13 +1217,42 @@ function printWorkout(workoutId) {
 
     printWindow.document.write(html);
     printWindow.document.close();
-    
-    // Stampa automatica quando la pagina si carica
-    printWindow.addEventListener('load', function() {
-        printWindow.print();
-        // Chiudi la finestra dopo la stampa
+
+    // Funzione di stampa robusta: onload/readyState + timeout fallback
+    function attemptPrint() {
+        try {
+            printWindow.focus();
+            printWindow.print();
+        } catch (err) {
+            console.error('Stampa non riuscita:', err);
+        }
+    }
+
+    // Se il documento è già pronto, prova subito
+    try {
+        if (printWindow.document.readyState === 'complete') {
+            attemptPrint();
+        } else {
+            // Ascolta eventi di caricamento
+            printWindow.onload = attemptPrint;
+            printWindow.document.addEventListener('readystatechange', function() {
+                if (printWindow.document.readyState === 'complete') attemptPrint();
+            });
+        }
+    } catch (e) {
+        // In alcuni browser mobile l'accesso a printWindow.document può lanciare errori
+        console.warn('Impossibile controllare readyState della finestra di stampa:', e);
+    }
+
+    // Chiudi la finestra dopo la stampa quando supportato
+    try {
         printWindow.addEventListener('afterprint', function() {
-            printWindow.close();
+            try { printWindow.close(); } catch (e) { /* noop */ }
         });
-    });
+    } catch (e) {
+        /* alcuni ambienti non supportano afterprint */
+    }
+
+    // Fallback: fornisce un tentativo supplementare dopo breve timeout (utile su Safari mobile)
+    setTimeout(attemptPrint, 900);
 }
