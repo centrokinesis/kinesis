@@ -1186,6 +1186,9 @@ function printWorkout(workoutId) {
             .exercise-details { padding: 10px; }
             body { padding: 10px; }
         }
+        /* Forza layout 4 colonne e larghezza fissa per la generazione PDF (override per html2canvas) */
+        .print-container { width: 190mm !important; max-width: 190mm !important; }
+        .exercises-grid { grid-template-columns: repeat(4, 1fr) !important; }
     </style>
 </head>
 <body>
