@@ -1099,11 +1099,17 @@ async function printWorkout(workoutId) {
             border-radius: 4px;
         }
         
+        /* Fixed grid also for screen so desktop preview matches print */
         .exercises-grid {
             display: grid;
-            grid-template-columns: repeat(4, 1fr);
-            gap: 20px;
-            margin-bottom: 30px;
+            grid-template-columns: repeat(4, 43mm);
+            grid-template-rows: repeat(3, 82mm);
+            column-gap: 3mm;
+            row-gap: 3mm;
+            width: 190mm;
+            height: calc(82mm * 3 + 3mm * 2);
+            margin-bottom: 10px;
+            margin: 0 auto 10px auto;
         }
         
         .exercise-card {
@@ -1114,7 +1120,12 @@ async function printWorkout(workoutId) {
             page-break-inside: avoid;
             display: flex;
             flex-direction: column;
+            width: 43mm;
+            height: 82mm;
+            box-sizing: border-box;
         }
+
+        .page { width: 190mm; height: 277mm; box-sizing: border-box; display: block; }
         
         .exercise-image {
             background: #f0f0f0;
