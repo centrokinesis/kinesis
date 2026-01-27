@@ -1400,22 +1400,67 @@ async function printWorkout(workoutId) {
                                     var filename = (document.title || 'scheda') + '.pdf';
                                     // Prova a creare un link con download e cliccarlo (migliore compatibilità mobile)
                                     try {
-                                        var a = document.createElement('a');
-                                        a.href = url;
-                                        a.download = filename;
-                                        a.target = '_blank';
-                                        a.rel = 'noopener';
-                                        // Alcuni browser mobile richiedono che l'elemento sia nel DOM
-                                        document.body.appendChild(a);
-                                        a.click();
-                                        setStatus('Aperto documento PDF (salva dal browser)');
-                                        // lasciare la finestra aperta: l'utente dovrà confermare il salvataggio
-                                        setTimeout(function(){ try { URL.revokeObjectURL(url); } catch(e){}; try { a.remove(); } catch(e){}; }, 60000);
-                                    } catch (errClick) {
-                                        console.error('Errore click su <a> download:', errClick);
-                                        // Ultima risorsa: apri in nuova scheda/fallback alla navigazione
-                                        try { window.open(url, '_blank'); setStatus('Aperto documento PDF in nuova scheda'); } catch(e) { try { window.location.href = url; } catch(e2) { console.error('Errore apertura blob URL:', e2); throw e2; } }
-                                    }
+                                        var file = new File([blob], filename, { type: 'application/pdf' });
+                                        var usedShare = false;
+
+                                        // Prova Web Share API con file (se disponibile)
+                                        if (navigator.canShare && navigator.canShare({ files: [file] })) {
+                                            try {
+                                                usedShare = true;
+                                                navigator.share({ files: [file], title: document.title || filename }).then(function(){
+                                                    setStatus('Aperto share dialog (salva/esporta dal browser)');
+                                                }).catch(function(shareErr){
+                                                    console.warn('Share fallito:', shareErr);
+                                                    usedShare = false;
+                                                });
+                                            } catch (shareEx) {
+                                                console.warn('Errore navigator.share:', shareEx);
+                                                usedShare = false;
+                                            }
+                                        }
+
+                                        if (!usedShare) {
+                                            // Prova download diretto tramite anchor
+                                            try {
+                                                var a = document.createElement('a');
+                                                a.href = url;
+                                                a.download = filename;
+                                                a.target = '_blank';
+                                                a.rel = 'noopener';
+                                                document.body.appendChild(a);
+                                                a.click();
+                                                setStatus('Aperto documento PDF (salva dal browser)');
+                                                setTimeout(function(){ try { URL.revokeObjectURL(url); } catch(e){}; try { a.remove(); } catch(e){}; }, 60000);
+                                                usedShare = true;
+                                            } catch (errClick) {
+                                                console.error('Errore click su <a> download:', errClick);
+                                                // Fallback: prova data URL (meno consigliato ma funziona su alcuni WebView)
+                                                try {
+                                                    var reader = new FileReader();
+                                                    reader.onload = function(evt) {
+                                                        try {
+                                                            var dataUrl = evt.target.result;
+                                                            var a2 = document.createElement('a');
+                                                            a2.href = dataUrl;
+                                                            a2.download = filename;
+                                                            document.body.appendChild(a2);
+                                                            a2.click();
+                                                            setStatus('Aperto documento PDF (uso data: URL)');
+                                                            setTimeout(function(){ try { a2.remove(); } catch(e){}; }, 60000);
+                                                            usedShare = true;
+                                                        } catch (err2) {
+                                                            console.error('Errore click su data URL:', err2);
+                                                        }
+                                                    };
+                                                    reader.onerror = function(reErr) { console.error('FileReader error:', reErr); };
+                                                    reader.readAsDataURL(blob);
+                                                } catch (errData) {
+                                                    console.error('Errore dataURL fallback:', errData);
+                                                    // Ultima risorsa: prova ad aprire in nuova scheda
+                                                    try { window.open(url, '_blank'); setStatus('Aperto documento PDF in nuova scheda'); usedShare = true; } catch(e) { console.error('Errore apertura blob URL:', e); }
+                                                }
+                                            }
+                                        }
                                 } catch (errBlob) {
                                     console.error('Errore generazione blob PDF:', errBlob);
                                     // fallback al salvataggio diretto
