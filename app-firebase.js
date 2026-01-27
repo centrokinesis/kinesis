@@ -1197,16 +1197,16 @@ async function printWorkout(workoutId) {
                 display: grid !important;
                 grid-template-columns: repeat(4, 43mm) !important;
                 grid-template-rows: repeat(3, 82mm) !important;
-                column-gap: 6mm;
-                row-gap: 6mm;
+                column-gap: 3mm;
+                row-gap: 3mm;
                 width: 190mm;
-                height: calc(82mm * 3 + 6mm * 2); /* 3 righe + 2 gap */
+                height: calc(82mm * 3 + 3mm * 2); /* 3 righe + 2 gap */
                 margin: 0 auto;
             }
 
             /* Page box: dimensioni A4 interne (@page margins 10mm => 297 - 20 = 277mm) */
             .page { width: 190mm !important; height: 277mm !important; box-sizing: border-box; page-break-after: always; display: block; }
-            .page .exercises-grid { grid-template-columns: repeat(4, 43mm); grid-template-rows: repeat(3, 82mm); column-gap: 6mm; row-gap: 6mm; }
+            .page .exercises-grid { grid-template-columns: repeat(4, 43mm); grid-template-rows: repeat(3, 82mm); column-gap: 3mm; row-gap: 3mm; }
 
             /* Riduci ulteriormente l'altezza minima e padding delle card per evitare spostamenti su pagina successiva */
             .print-container .exercise-card {
@@ -1244,7 +1244,7 @@ async function printWorkout(workoutId) {
         }
         /* Forza layout a 4 colonne in modalità stampa */
         @media print {
-            .exercises-grid { grid-template-columns: repeat(4, 43mm) !important; grid-template-rows: repeat(3, 82mm) !important; column-gap: 6mm !important; row-gap: 6mm !important; }
+            .exercises-grid { grid-template-columns: repeat(4, 43mm) !important; grid-template-rows: repeat(3, 82mm) !important; column-gap: 3mm !important; row-gap: 3mm !important; }
         }
         /* Responsive per schermi piccoli (migliora layout su mobile) - applica solo a schermo, non alla stampa */
         @media screen and (max-width: 800px) {
