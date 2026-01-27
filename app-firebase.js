@@ -406,7 +406,11 @@ function addExerciseField() {
                 <label>Recupero (sec):</label>
                 <input type="number" class="exercise-rest" placeholder="60" min="0" step="15">
             </div>
-            <button type="button" class="btn-remove" onclick="removeExercise(this)">✕</button>
+            <div style="display:flex;align-items:center;gap:6px;">
+                <button type="button" class="btn-move-up" onclick="moveExerciseUp(this)" title="Sposta su" style="padding:6px 8px;border-radius:4px;">▲</button>
+                <button type="button" class="btn-move-down" onclick="moveExerciseDown(this)" title="Sposta giù" style="padding:6px 8px;border-radius:4px;">▼</button>
+                <button type="button" class="btn-remove" onclick="removeExercise(this)" style="padding:6px 8px;border-radius:4px;">✕</button>
+            </div>
         </div>
         <div class="form-group">
             <label>Note:</label>
@@ -434,6 +438,27 @@ function removeExercise(button) {
         button.closest('.exercise-item').remove();
     } else {
         alert('Devi avere almeno un esercizio nella scheda!');
+    }
+}
+
+// Sposta l'esercizio verso l'alto
+function moveExerciseUp(button) {
+    const item = button.closest('.exercise-item');
+    if (!item) return;
+    const prev = item.previousElementSibling;
+    if (prev && prev.classList.contains('exercise-item')) {
+        item.parentNode.insertBefore(item, prev);
+    }
+}
+
+// Sposta l'esercizio verso il basso
+function moveExerciseDown(button) {
+    const item = button.closest('.exercise-item');
+    if (!item) return;
+    const next = item.nextElementSibling;
+    if (next && next.classList.contains('exercise-item')) {
+        // Inserisci il fratello successivo prima dell'elemento corrente per scambiarli
+        item.parentNode.insertBefore(next, item);
     }
 }
 
