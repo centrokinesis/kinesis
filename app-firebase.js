@@ -1397,10 +1397,25 @@ async function printWorkout(workoutId) {
                                 try {
                                     var blob = pdf.output('blob');
                                     var url = URL.createObjectURL(blob);
-                                    // Apri il blob nello stesso tab per permettere il salvataggio in Firefox Mobile
-                                    try { window.location.href = url; } catch(e) { window.open(url, '_blank'); }
-                                    setStatus('Aperto documento PDF (salva dal browser)');
-                                    // non chiudere subito la finestra per lasciare il browser gestire il blob
+                                    var filename = (document.title || 'scheda') + '.pdf';
+                                    // Prova a creare un link con download e cliccarlo (migliore compatibilità mobile)
+                                    try {
+                                        var a = document.createElement('a');
+                                        a.href = url;
+                                        a.download = filename;
+                                        a.target = '_blank';
+                                        a.rel = 'noopener';
+                                        // Alcuni browser mobile richiedono che l'elemento sia nel DOM
+                                        document.body.appendChild(a);
+                                        a.click();
+                                        setStatus('Aperto documento PDF (salva dal browser)');
+                                        // lasciare la finestra aperta: l'utente dovrà confermare il salvataggio
+                                        setTimeout(function(){ try { URL.revokeObjectURL(url); } catch(e){}; try { a.remove(); } catch(e){}; }, 60000);
+                                    } catch (errClick) {
+                                        console.error('Errore click su <a> download:', errClick);
+                                        // Ultima risorsa: apri in nuova scheda/fallback alla navigazione
+                                        try { window.open(url, '_blank'); setStatus('Aperto documento PDF in nuova scheda'); } catch(e) { try { window.location.href = url; } catch(e2) { console.error('Errore apertura blob URL:', e2); throw e2; } }
+                                    }
                                 } catch (errBlob) {
                                     console.error('Errore generazione blob PDF:', errBlob);
                                     // fallback al salvataggio diretto
