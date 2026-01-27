@@ -1518,8 +1518,31 @@ async function printWorkout(workoutId) {
 </html>
     `;
 
-    printWindow.document.write(html);
-    printWindow.document.close();
+    try {
+        console.log('Attempting to write to printWindow:', !!printWindow);
+        if (!printWindow || printWindow.closed) throw new Error('Popup blocked or unavailable');
+        printWindow.document.open();
+        printWindow.document.write(html);
+        printWindow.document.close();
+    } catch (writeErr) {
+        console.warn('Could not write to child window, falling back to blob URL. Error:', writeErr);
+        try {
+            const blob = new Blob([html], { type: 'text/html' });
+            const url = URL.createObjectURL(blob);
+            // Try to open blob in new tab/window
+            const opened = window.open(url, '_blank');
+            if (!opened) {
+                // As last resort, navigate current window (user will lose page)
+                window.location.href = url;
+            }
+            // Do not revoke immediately; leave object url for the tab to load
+            setTimeout(() => { try { URL.revokeObjectURL(url); } catch (e) {} }, 60000);
+        } catch (blobErr) {
+            console.error('Blob fallback failed:', blobErr);
+            alert('Impossibile aprire la finestra di stampa. Disabilita il blocco popup o usa un altro browser.');
+            return;
+        }
+    }
 
     // La finestra figlia contiene lo script che genera il PDF autonomamente.
     // Se qualcosa va storto, l'utente può usare 'Salva/Esporta' del browser dalla finestra aperta.
