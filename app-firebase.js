@@ -1229,13 +1229,8 @@ async function printWorkout(workoutId) {
                 border-radius: 3px;
             }
 
-            /* Ogni giorno inizia su una nuova pagina; se troppo lungo può continuare senza ripetere il titolo */
-            .print-container .day-section {
-                page-break-before: always;
-                page-break-inside: auto;
-            }
-            .print-container .day-section:first-child {
-                page-break-before: avoid;
+            .day-section {
+                page-break-inside: avoid;
             }
         }
         /* Forza layout a 4 colonne in modalità stampa */
