@@ -1384,15 +1384,45 @@ async function printWorkout(workoutId) {
 
                     var container = document.querySelector('.print-container') || document.body;
                     try {
-                        html2pdf().from(container).set(opt).save().then(function(){
-                            setStatus('Download completato');
-                            setTimeout(function(){ try { window.close(); } catch(e){} }, 700);
-                        }).catch(function(err){
-                            console.error('Errore html2pdf.save():', err);
-                            setStatus('Errore generazione PDF');
-                            // fallback: invoca print per permettere Salva come PDF manuale
-                            setTimeout(function(){ try { window.print(); } catch(e){} }, 300);
-                        });
+                        // Detect Firefox on mobile (and fallback to blob open there)
+                        var isFirefox = /firefox/i.test(navigator.userAgent);
+                        var isMobile = /Mobi|Android/i.test(navigator.userAgent);
+                        var useBlobOpen = isFirefox && isMobile;
+
+                        var h2p = html2pdf().from(container).set(opt);
+
+                        if (useBlobOpen && h2p && h2p.toPdf) {
+                            // Generate PDF and open blob URL (Firefox mobile cannot always auto-download)
+                            h2p.toPdf().get('pdf').then(function(pdf){
+                                try {
+                                    var blob = pdf.output('blob');
+                                    var url = URL.createObjectURL(blob);
+                                    // Apri il blob nello stesso tab per permettere il salvataggio in Firefox Mobile
+                                    try { window.location.href = url; } catch(e) { window.open(url, '_blank'); }
+                                    setStatus('Aperto documento PDF (salva dal browser)');
+                                    // non chiudere subito la finestra per lasciare il browser gestire il blob
+                                } catch (errBlob) {
+                                    console.error('Errore generazione blob PDF:', errBlob);
+                                    // fallback al salvataggio diretto
+                                    h2p.save().then(function(){ setStatus('Download completato'); setTimeout(function(){ try { window.close(); } catch(e){} }, 700); }).catch(function(err){ console.error('Errore save fallback:', err); setStatus('Errore generazione PDF'); setTimeout(function(){ try { window.print(); } catch(e){} }, 300); });
+                                }
+                            }).catch(function(err){
+                                console.error('Errore toPdf/get(pdf):', err);
+                                // fallback alla normale save
+                                h2p.save().then(function(){ setStatus('Download completato'); setTimeout(function(){ try { window.close(); } catch(e){} }, 700); }).catch(function(err2){ console.error('Errore save fallback:', err2); setStatus('Errore generazione PDF'); setTimeout(function(){ try { window.print(); } catch(e){} }, 300); });
+                            });
+                        } else {
+                            // Comportamento predefinito: salva automaticamente
+                            h2p.save().then(function(){
+                                setStatus('Download completato');
+                                setTimeout(function(){ try { window.close(); } catch(e){} }, 700);
+                            }).catch(function(err){
+                                console.error('Errore html2pdf.save():', err);
+                                setStatus('Errore generazione PDF');
+                                // fallback: invoca print per permettere Salva come PDF manuale
+                                setTimeout(function(){ try { window.print(); } catch(e){} }, 300);
+                            });
+                        }
                     } catch (syncErr) {
                         console.error('Errore sincrono durante html2pdf:', syncErr);
                         setStatus('Errore nella libreria PDF');
