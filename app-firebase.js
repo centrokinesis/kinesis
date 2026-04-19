@@ -2,6 +2,8 @@
 let currentUser = null;
 let workouts = [];
 let clients = [];
+let accountClients = [];
+let accountSearchTerm = '';
 let clientWorkouts = {};
 let workoutState = {
     name: "",
@@ -93,6 +95,40 @@ function checkAuthState() {
             showLoginPage();
         }
     });
+}
+function handleAccountSearch(e) {
+    accountSearchTerm = e.target.value.trim().toLowerCase();
+    renderAccountsList();
+}
+
+function renderAccountsList() {
+    const container = document.getElementById('accountsList');
+    if (!container) return;
+
+    if (accountClients.length === 0) {
+        container.innerHTML = '<p class="empty-state">Nessun cliente registrato.</p>';
+        return;
+    }
+
+    const filteredClients = accountClients.filter(client =>
+        (client.name || '').toLowerCase().includes(accountSearchTerm)
+    );
+
+    if (filteredClients.length === 0) {
+        container.innerHTML = '<p class="empty-state">Nessun cliente trovato con questo nome.</p>';
+        return;
+    }
+
+    container.innerHTML = filteredClients.map(client => `
+        <div class="account-card">
+            <div class="account-info">
+                <h4>${client.name}</h4>
+                <p><strong>Username:</strong> ${client.username}</p>
+                <p><strong>ID:</strong> ${client.uid}</p>
+            </div>
+            <button class="btn-delete-account" onclick="deleteAccount('${client.uid}')">Elimina</button>
+        </div>
+    `).join('');
 }
 
 // Gestisci login
@@ -226,6 +262,12 @@ function setupAdminDashboard() {
         createAccountForm.removeEventListener('submit', handleCreateAccount);
         createAccountForm.addEventListener('submit', handleCreateAccount);
     }
+
+    const accountSearchInput = document.getElementById('accountSearchInput');
+    if (accountSearchInput) {
+        accountSearchInput.removeEventListener('input', handleAccountSearch);
+        accountSearchInput.addEventListener('input', handleAccountSearch);
+    }
 }
 
 // Carica schede da Firebase
@@ -347,6 +389,7 @@ function displayWorkouts() {
                     `).join('')}
                         <div class="workout-actions" style="margin-top: 15px; display: flex; gap: 10px; flex-wrap: wrap; align-items: center;">
                             <button class="btn-edit" onclick="event.stopPropagation(); editWorkout('${workout.id}')">Modifica</button>
+                            <button class="btn-duplicate" onclick="event.stopPropagation(); duplicateWorkout('${workout.id}')">Duplica</button>
                             <button class="btn-delete" onclick="event.stopPropagation(); deleteWorkout('${workout.id}')">Elimina</button>
                             <button class="btn-edit btn-print" title="Salva" aria-label="Salva" onclick="event.stopPropagation(); printWorkout('${workout.id}')">Salva</button>
                         </div>
@@ -376,6 +419,58 @@ async function deleteWorkout(id) {
         console.error('Errore eliminazione scheda:', error);
         alert('Errore durante l\'eliminazione');
     }
+}
+
+// Duplica scheda
+async function duplicateWorkout(id) {
+    event.stopPropagation(); // Previeni chiusura card
+
+    const workout = workouts.find(w => w.id === id);
+    if (!workout) {
+        alert('Scheda non trovata!');
+        return;
+    }
+
+    const duplicatedDays = JSON.parse(JSON.stringify(workout.days || { 1: [] }));
+    const duplicateName = generateDuplicateWorkoutName(workout.name);
+
+    try {
+        await db.collection(COLLECTIONS.WORKOUTS).add({
+            name: duplicateName,
+            days: duplicatedDays,
+            createdAt: firebase.firestore.FieldValue.serverTimestamp(),
+            updatedAt: firebase.firestore.FieldValue.serverTimestamp(),
+            createdBy: currentUser.uid
+        });
+
+        alert(`Scheda duplicata con successo come "${duplicateName}". Ora puoi modificarla o rinominarla.`);
+        await loadWorkouts();
+    } catch (error) {
+        console.error('Errore duplicazione scheda:', error);
+        alert('Errore durante la duplicazione della scheda');
+    }
+}
+
+function generateDuplicateWorkoutName(originalName) {
+    const baseOriginalName = (originalName || 'Scheda').trim();
+    const baseName = `Copia di ${baseOriginalName}`;
+    const existingNames = new Set(
+        workouts.map(workout => (workout.name || '').trim().toLowerCase())
+    );
+
+    if (!existingNames.has(baseName.toLowerCase())) {
+        return baseName;
+    }
+
+    let copyNumber = 2;
+    let candidateName = `${baseName} (${copyNumber})`;
+
+    while (existingNames.has(candidateName.toLowerCase())) {
+        copyNumber += 1;
+        candidateName = `${baseName} (${copyNumber})`;
+    }
+
+    return candidateName;
 }
 
 // Aggiungi esercizio
@@ -787,25 +882,14 @@ async function displayAccountsList() {
         const snapshot = await db.collection(COLLECTIONS.USERS)
             .where('role', '==', 'client')
             .get();
-        
-        const clients = snapshot.docs.map(doc => ({ uid: doc.id, ...doc.data() }));
-        const container = document.getElementById('accountsList');
-        
-        if (clients.length === 0) {
-            container.innerHTML = '<p class="empty-state">Nessun cliente registrato.</p>';
-            return;
-        }
-        
-        container.innerHTML = clients.map(client => `
-            <div class="account-card">
-                <div class="account-info">
-                    <h4>${client.name}</h4>
-                    <p><strong>Username:</strong> ${client.username}</p>
-                    <p><strong>ID:</strong> ${client.uid}</p>
-                </div>
-                <button class="btn-delete-account" onclick="deleteAccount('${client.uid}')">Elimina</button>
-            </div>
-        `).join('');
+
+        accountClients = snapshot.docs
+            .map(doc => ({ uid: doc.id, ...doc.data() }))
+            .sort((a, b) => (a.name || '').localeCompare(b.name || '', 'it', { sensitivity: 'base' }));
+
+        const searchInput = document.getElementById('accountSearchInput');
+        accountSearchTerm = searchInput ? searchInput.value.trim().toLowerCase() : '';
+        renderAccountsList();
         
     } catch (error) {
         console.error('Errore caricamento account:', error);
