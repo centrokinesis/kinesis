@@ -268,6 +268,16 @@ function setupAdminDashboard() {
         accountSearchInput.removeEventListener('input', handleAccountSearch);
         accountSearchInput.addEventListener('input', handleAccountSearch);
     }
+
+    const workoutSearchInput = document.getElementById('workoutSearchInput');
+    if (workoutSearchInput) {
+        workoutSearchInput.removeEventListener('input', handleWorkoutSearch);
+        workoutSearchInput.addEventListener('input', handleWorkoutSearch);
+    }
+}
+
+function handleWorkoutSearch() {
+    displayWorkouts();
 }
 
 // Carica schede da Firebase
@@ -353,7 +363,20 @@ function resetExercisesList() {
 // Visualizza schede
 function displayWorkouts() {
     const container = document.getElementById('workoutsContainer');
-    container.innerHTML = workouts.map(workout => `
+    if (!container) return;
+
+    const searchTerm = document.getElementById('workoutSearchInput')?.value.trim().toLowerCase() || '';
+    const filteredWorkouts = workouts.filter(workout => {
+        const workoutName = (workout.name || '').toLowerCase();
+        return workoutName.includes(searchTerm);
+    });
+
+    if (filteredWorkouts.length === 0) {
+        container.innerHTML = '<p class="empty-state">Nessuna scheda trovata con questo titolo.</p>';
+        return;
+    }
+
+    container.innerHTML = filteredWorkouts.map(workout => `
         <div class="workout-card">
             <div class="workout-header" onclick="toggleWorkout(this)">
                 <h3>${workout.name}</h3>

@@ -752,6 +752,27 @@ select:focus {
     flex: 1;
 }
 
+.workout-search-group {
+    min-width: 260px;
+    max-width: 360px;
+    flex: 1;
+}
+
+.workout-search-group input {
+    width: 100%;
+    padding: 10px 12px;
+    border: 1px solid #d0d7de;
+    border-radius: 8px;
+    font-size: 0.95rem;
+    box-sizing: border-box;
+}
+
+.workout-search-group input:focus {
+    outline: none;
+    border-color: #3CADD4;
+    box-shadow: 0 0 0 3px rgba(60, 173, 212, 0.15);
+}
+
 /* Container schede - Layout Lista (default) */
 #workoutsContainer.workouts-list,
 #clientWorkoutsContainer.workouts-list {
@@ -769,6 +790,40 @@ select:focus {
     
     .btn-delete-account {
         width: 100%;
+    }
+
+    .workouts-header {
+        flex-direction: column;
+        align-items: stretch;
+    }
+
+    .workouts-header h2 {
+        width: 100%;
+    }
+
+    .workout-search-group {
+        min-width: 100%;
+        max-width: 100%;
+    }
+
+    .workout-header {
+        padding: 16px;
+        gap: 10px;
+    }
+
+    .workout-header h3 {
+        font-size: 1.1rem;
+        line-height: 1.3;
+        flex: 1;
+    }
+
+    .expand-icon {
+        font-size: 1.2rem;
+        flex-shrink: 0;
+    }
+
+    .workout-body {
+        padding: 16px;
     }
 }
 
